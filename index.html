@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCarebd.Com Management Portal</title>
+    <meta name="description" content="BCarebd.Com Veterinary Enterprise Management Portal with Dealer, Inventory, Order, and Zone-based Management." />
+    <meta property="og:title" content="BCarebd.Com Management Portal" />
+    <meta property="og:description" content="BCarebd.Com Veterinary Enterprise Management Portal with Dealer, Inventory, Order, and Zone-based Management." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style> 
+        body { font-family: 'Hind Siliguri', sans-serif; } 
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+        @media (max-width: 1024px) {
+            .tab-btn {
+                padding: 0.4rem 0.65rem !important;
+                font-size: 0.8rem !important;
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                font-size: 0.825rem;
+            }
+            table {
+                font-size: 0.7rem !important;
+            }
+            th, td {
+                padding: 0.35rem 0.4rem !important;
+                word-break: break-word;
+            }
+            .tab-btn {
+                padding: 0.35rem 0.5rem !important;
+                font-size: 0.75rem !important;
+            }
+            h1, h2 {
+                font-size: 1.1rem !important;
+            }
+            h3 {
+                font-size: 0.95rem !important;
+            }
+        }
+        @media print { 
+            body * { visibility: hidden !important; } 
+            #universalPrintContainer, #universalPrintContainer * { visibility: visible !important; } 
+            #universalPrintContainer { 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important; 
+                display: block !important; 
+                background: white !important; 
+                z-index: 999999 !important; 
+            } 
+            .no-print, button, nav, header {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+    <div id="root"></div>
+
+    <!-- ================= NOTIFICATION & LIVE TICKER ================= -->
+    <div class="bg-emerald-950 border-b-2 border-amber-400 text-white px-4 py-2.5 text-sm font-medium flex items-center justify-between shadow-lg">
+        <div class="flex items-center overflow-hidden flex-grow mr-4">
+            <span class="bg-amber-400 text-slate-950 font-black px-3 py-1 rounded-md text-xs uppercase mr-3 tracking-wider shadow flex items-center gap-1.5 flex-shrink-0">
+                <i class="fa-solid fa-bullhorn text-emerald-900"></i> নোটিস বোর্ড
+            </span>
+            <marquee scrollamount="5" id="topNoticeText" class="text-white font-extrabold text-sm sm:text-base tracking-wide drop-shadow">BCarebd.Com পোর্টালে স্বাগতম। জোনভিত্তিক সেলস ও কালেকশন নিয়মিত আপডেট করুন।</marquee>
+        </div>
+        <div class="flex items-center space-x-2 flex-shrink-0">
+            <span id="liveAlertBadge" class="bg-red-600 text-white px-2.5 py-0.5 rounded-full text-xs font-bold animate-pulse hidden cursor-pointer shadow">নতুন নোটিফিকেশন!</span>
+            <button onclick="openNoticeModal()" id="changeNoticeBtn" class="hidden bg-amber-500 hover:bg-amber-400 text-slate-950 px-2.5 py-1 rounded text-xs font-bold whitespace-nowrap shadow">নোটিস পরিবর্তন</button>
+        </div>
+    </div>
+
+    <!-- ================= 1. LOGIN PAGE (Requirement 1: No Role Dropdown, Only ID and Pass, Bottom Info Removed) ================= -->
+    <div id="loginPage" class="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 border-t-4 border-emerald-600 space-y-5">
+            <div class="text-center">
+                <div class="bg-emerald-100 text-emerald-600 w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-2 text-xl font-bold shadow-xs">
+                    <i class="fa-solid fa-capsules"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900">BCarebd.Com</h1>
+                <p class="text-xs text-slate-500 mt-1 font-medium">নিরাপদ এন্টারপ্রাইজ ম্যানেজমেন্ট পোর্টাল</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-id-badge text-emerald-600"></i> ইউজার আইডি / স্টাফ আইডি / ডিলার কোড
+                    </label>
+                    <input type="text" id="loginUserIdInput" required placeholder="আইডি লিখুন (যেমন: admin1, 2201, emp1)" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 text-sm bg-white font-semibold text-slate-800 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-lock text-emerald-600"></i> পাসওয়ার্ড
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="loginPass" required value="12345" placeholder="পাসওয়ার্ড লিখুন" class="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 text-sm pr-11 font-mono focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 focus:outline-none transition">
+                        <button type="button" onclick="window.togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none text-sm p-1.5" title="পাসওয়ার্ড দেখুন / লুকান">
+                            <i id="passEyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs pt-0.5">
+                    <label class="flex items-center space-x-2 cursor-pointer text-slate-600 font-medium select-none">
+                        <input type="checkbox" id="rememberMeCheckbox" checked class="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                        <span>ব্রাউজারে মনে রাখুন (Remember Me)</span>
+                    </label>
+                    <button type="button" onclick="openChangePassModal()" class="text-xs text-emerald-600 hover:underline font-semibold">পাসওয়ার্ড পরিবর্তন</button>
+                </div>
+                <div id="loginError" class="text-red-600 text-xs hidden font-bold bg-red-50 p-2.5 rounded-lg border border-red-200 text-center">
+                    ⚠️ ভুল ইউজার আইডি বা পাসওয়ার্ড! সঠিক তথ্য দিয়ে পুনরায় চেষ্টা করুন।
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow flex items-center justify-center gap-2 cursor-pointer">
+                    <span>লগইন করুন</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= 2. MAIN APP CONTAINER ================= -->
+    <div id="mainApp" class="hidden min-h-screen flex flex-col">
+        
+        <!-- Header -->
+        <header class="bg-emerald-800 text-white shadow-md sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.openCompanyBrandingModal()" title="কোম্পানির নাম, স্লোগান ও ব্যানার পরিবর্তন করুন (Admin)">
+                    <div class="bg-white text-emerald-800 p-2 rounded-lg font-bold text-lg shadow-xs group-hover:scale-105 transition"><i class="fa-solid fa-capsules"></i></div>
+                    <div>
+                        <div class="flex items-center gap-1.5">
+                            <h1 class="text-base sm:text-lg font-bold" id="companyHeaderTitle">BCarebd.Com</h1>
+                            <i class="fa-solid fa-pen-to-square text-[10px] text-emerald-300 opacity-60 group-hover:opacity-100 transition" title="এডিট করুন"></i>
+                        </div>
+                        <p class="text-[10px] text-emerald-200" id="companyHeaderSubtitle">ম্যানেজমেন্ট পোর্টাল</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="openNotificationModal()" class="relative bg-emerald-700 hover:bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold shadow flex items-center gap-1 transition">
+                        <i class="fa-solid fa-bell"></i>
+                        <span class="hidden sm:inline">নোটিফিকেশন</span>
+                        <span id="notifCountBadge" class="bg-red-500 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold hidden animate-pulse">0</span>
+                    </button>
+                    <span class="text-xs bg-emerald-700 px-3 py-1.5 rounded-full text-emerald-100 flex items-center">
+                        <i class="fa-solid fa-user mr-1.5"></i> <span id="currentUserName">Admin</span> &nbsp;(<span id="currentUserRole">Admin</span>)
+                    </span>
+                    <button onclick="handleLogout()" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow transition">লগআউট</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="bg-white shadow-sm border-b sticky top-[53px] z-20">
+            <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-2 py-2 items-center">
+                <button onclick="switchTab('dealerPortal')" id="btn-dealerPortal" class="tab-btn px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap bg-emerald-600 text-white hidden"><i class="fa-solid fa-store mr-1.5"></i> ডিলার পোর্টাল (My Portal)</button>
+                <button onclick="switchTab('products')" id="btn-products" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap bg-emerald-600 text-white"><i class="fa-solid fa-box-open mr-1"></i> ইনভেন্টরি</button>
+                <button onclick="switchTab('dealers')" id="btn-dealers" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-store mr-1"></i> ডিলার ম্যানেজমেন্ট</button>
+                <button onclick="switchTab('orders')" id="btn-orders" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-cart-shopping mr-1"></i> অর্ডার ও সেলস</button>
+                <button onclick="switchTab('factoryPanel')" id="btn-factoryPanel" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100 hidden"><i class="fa-solid fa-industry mr-1"></i> ফ্যাক্টরি চালান (Challan)</button>
+                <button onclick="switchTab('production')" id="btn-production" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100 hidden"><i class="fa-solid fa-flask-vial mr-1"></i> প্রোডাকশন ম্যানেজমেন্ট</button>
+                <button onclick="switchTab('salesReturn')" id="btn-salesReturn" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100 hidden"><i class="fa-solid fa-rotate-left mr-1"></i> সেলস রিটার্ন (Sales Return)</button>
+                <button onclick="switchTab('records')" id="btn-records" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-file-lines mr-1"></i> মাস্টার রিপোর্ট ও ডেলিভারি</button>
+                <button onclick="switchTab('profile')" id="btn-profile" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100"><i class="fa-solid fa-id-card mr-1"></i> প্রোফাইল ও লেজার</button>
+                <button onclick="switchTab('adminPanel')" id="btn-adminPanel" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap text-slate-600 hover:bg-slate-100 hidden"><i class="fa-solid fa-user-gear mr-1"></i> Admin কন্ট্রোল ও সেলস টিম</button>
+                <button onclick="openMasterModifyModal()" id="btn-masterModify" class="tab-btn px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap bg-indigo-700 hover:bg-indigo-800 text-white hidden shadow transition"><i class="fa-solid fa-sliders mr-1.5"></i> পরিবর্তন করুন</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+            <!-- TAB 1: PRODUCTS -->
+            <div id="tab-products" class="tab-content space-y-4">
+                <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">প্রোডাক্ট ইনভেন্টরি</h2>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="printContent('printableProductsArea', 'প্রোডাক্ট ইনভেন্টরি তালিকা')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow"><i class="fa-solid fa-print mr-1"></i> প্রোডাক্ট তালিকা প্রিন্ট</button>
+                        <button id="addProductBtn" onclick="openProductModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow">
+                            <i class="fa-solid fa-plus mr-2"></i> নতুন প্রোডাক্ট যোগ করুন
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden" id="printableProductsArea">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-semibold">
+                                <th class="p-3">ছবি</th>
+                                <th class="p-3">প্রোডাক্ট কোড</th>
+                                <th class="p-3">প্রোডাক্ট নাম</th>
+                                <th class="p-3">একক (Unit)</th>
+                                <th class="p-3">রেট (৳)</th>
+                                <th class="p-3">স্টক</th>
+                                <th class="p-3 text-right">কার্যক্রম</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody" class="divide-y text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 2: DEALERS -->
+            <div id="tab-dealers" class="tab-content hidden space-y-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm border flex flex-wrap justify-between items-center gap-3">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">ডিলার ডিরেক্টরি ও জোনভিত্তিক তালিকা</h2>
+                        <div id="dealerZoneNotice" class="mt-1"></div>
+                    </div>
+                    <div class="flex flex-wrap items-center space-x-2">
+                        <div id="dealerZoneFilterDiv" class="hidden">
+                            <select id="dealerZoneFilter" onchange="filterDealersByZone()" class="px-3 py-1.5 border rounded-lg text-xs bg-white text-slate-700 font-semibold"></select>
+                        </div>
+                        <button onclick="printContent('printableDealersArea', 'ডিলার ডিরেক্টরি ও জোনভিত্তিক তালিকা')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow"><i class="fa-solid fa-print mr-1"></i> ডিলার তালিকা প্রিন্ট</button>
+                        <button id="addDealerBtn" onclick="openDealerModal()" class="hidden bg-emerald-600 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow">ডিলার যোগ করুন (Admin)</button>
+                        <button onclick="openDealerAppModal()" class="bg-teal-600 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow">ডিলার আবেদন ফরম</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden" id="printableDealersArea">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-semibold">
+                                <th class="p-3">ছবি</th>
+                                <th class="p-3">কোড</th>
+                                <th class="p-3">ডিলার নাম</th>
+                                <th class="p-3">চেয়ারম্যান / এমডি / প্রোপাইটর</th>
+                                <th class="p-3">জোন ও ঠিকানা</th>
+                                <th class="p-3">মোবাইল</th>
+                                <th class="p-3">স্ট্যাটাস</th>
+                                <th class="p-3 text-right">কার্যক্রম</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dealerTableBody" class="divide-y text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: ORDERS -->
+            <div id="tab-orders" class="tab-content hidden space-y-4">
+                <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800">অর্ডার এন্ট্রি ও পরিচালনা</h2>
+                        <p class="text-xs text-slate-500">জোনভিত্তিক সেলস ম্যান ও সক্রিয় ডিলারের জন্য অর্ডার ব্যবস্থাপক</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="printContent('printableOrdersArea', 'অর্ডার ও সেলস রিপোর্ট')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow"><i class="fa-solid fa-print mr-1"></i> অর্ডার তালিকা প্রিন্ট</button>
+                        <button id="placeOrderBtnMain" onclick="openOrderModal()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg shadow">
+                            <i class="fa-solid fa-cart-plus mr-2"></i> নতুন অর্ডার প্লেস করুন
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden" id="printableOrdersArea">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs uppercase font-semibold">
+                                <th class="p-3">অর্ডার আইডি</th>
+                                <th class="p-3">ডিলার ও জোন</th>
+                                <th class="p-3">সেলস ম্যান</th>
+                                <th class="p-3">আইটেম ও পরিমাণ</th>
+                                <th class="p-3">বিল, কালেকশন ও বাকি</th>
+                                <th class="p-3">ডেলিভারি স্ট্যাটাস</th>
+                                <th class="p-3 text-right">প্রিন্ট / অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orderTableBody" class="divide-y text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3.5: FACTORY CHALLAN PANEL -->
+            <div id="tab-factoryPanel" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex flex-wrap justify-between items-center gap-3 border-b pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-industry text-emerald-600"></i> ফ্যাক্টরি চালান জেনারেশন ও গেটপাস
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-0.5">পেন্ডিং আনডেলিভার্ড পণ্যের ওপর চালান তৈরি করুন</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="relative">
+                                <input type="text" id="challanDealerSearchInput" oninput="window.searchDealerForChallan(this.value)" placeholder="🔍 ডিলার কোড বা নাম দিয়ে খুঁজুন..." class="px-3 py-2 border rounded-lg text-xs bg-white w-48 sm:w-60 font-semibold text-slate-800 shadow-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <label class="text-xs font-bold text-slate-700 whitespace-nowrap">ডিলার তালিকা:</label>
+                                <select id="challanDealerSelect" onchange="loadDealerPendingChallanItems()" class="px-3 py-2 border rounded-lg text-sm bg-white font-semibold text-emerald-800 shadow-sm max-w-xs sm:max-w-md"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="selectedDealerChallanInfo" class="hidden"></div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
+                                <i class="fa-solid fa-boxes-stacked text-blue-600"></i> চালানের জন্য প্রস্তুতকৃত পণ্যের তালিকা
+                            </h3>
+                            <span class="text-xs text-slate-500 italic">প্রয়োজনে পরিমাণ কম করতে পারবেন বা প্রস্তুত না থাকলে লাইন বাদ দিতে পারেন</span>
+                        </div>
+                        <div class="border rounded-xl overflow-hidden bg-slate-50">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-200 text-slate-700 font-bold uppercase">
+                                        <th class="p-2.5">প্রোডাক্ট কোড ও নাম</th>
+                                        <th class="p-2.5">অর্ডার নম্বরসমূহ ও তারিখ</th>
+                                        <th class="p-2.5 text-center">একক</th>
+                                        <th class="p-2.5 text-center">পেন্ডিং পরিমাণ</th>
+                                        <th class="p-2.5 text-center w-36">চালান পরিমাণ (ডেলিভারি)</th>
+                                        <th class="p-2.5 text-right">বাদ দিন</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="challanItemsTableBody" class="divide-y bg-white">
+                                    <tr><td colspan="6" class="p-6 text-center text-slate-400">চালান তৈরি করতে ওপর থেকে একজন ডিলার নির্বাচন করুন।</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap justify-between items-center gap-4 bg-emerald-50 p-4 rounded-xl border border-emerald-200">
+                        <div class="flex-grow max-w-md">
+                            <label class="block text-[11px] font-bold text-slate-700 uppercase mb-1">পরিবহন / ডেলিভারিম্যান / ট্রাক নোট (অপশনাল)</label>
+                            <input type="text" id="challanTransportNotes" placeholder="যেমন: ট্রাক নং: ঢাকা মেট্রো-ট-১২৩৪, চালক: রফিক (০১৭১...)" class="w-full px-3 py-2 border rounded-lg text-xs bg-white">
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="processCreateChallan()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-lg text-sm shadow flex items-center gap-2 transition cursor-pointer">
+                                <i class="fa-solid fa-file-circle-check"></i> চালান তৈরি ও সংরক্ষণ করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-emerald-600"></i> ইস্যুকৃত চালান ইতিহাস ও প্রিন্ট (Challan History)
+                    </h3>
+                    <div class="overflow-x-auto border rounded-xl" id="printableChallansArea">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                    <th class="p-3">চালান নং</th>
+                                    <th class="p-3">তারিখ ও সময়</th>
+                                    <th class="p-3">ডিলার ও জোন</th>
+                                    <th class="p-3">ডেলিভারিকৃত পণ্য</th>
+                                    <th class="p-3">মোট সংখ্যা</th>
+                                    <th class="p-3">প্রস্তুতকারক</th>
+                                    <th class="p-3 text-right">চালান প্রিন্ট / ভিউ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="issuedChallansTableBody" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: PRODUCTION MANAGEMENT -->
+            <div id="tab-production" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex flex-wrap justify-between items-center gap-4 border-b pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-industry text-emerald-600"></i> প্রোডাকশন ও ব্যাচ এন্ট্রি প্যানেল (Production Management)
+                            </h2>
+                            <p class="text-xs text-slate-500">ফ্যাক্টরি তৈরি পণ্য এন্ট্রি ও এডমিনের অনুমোদন ট্র্যাকিং</p>
+                        </div>
+                        <button onclick="window.openProductionEntryModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2.5 rounded-lg shadow flex items-center gap-2 transition cursor-pointer">
+                            <i class="fa-solid fa-plus-circle"></i> নতুন প্রোডাকশন ব্যাচ এন্ট্রি
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto border rounded-xl">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                                    <th class="p-3">ব্যাচ নং ও তারিখ</th>
+                                    <th class="p-3">প্রোডাক্টের নাম ও কোড</th>
+                                    <th class="p-3">এন্ট্রি পরিমাণ</th>
+                                    <th class="p-3">অনুমোদিত পরিমাণ</th>
+                                    <th class="p-3">এন্ট্রি করেছেন</th>
+                                    <th class="p-3">মন্তব্য / নোট</th>
+                                    <th class="p-3">স্ট্যাটাস</th>
+                                    <th class="p-3 text-right">কার্যক্রম</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productionTableBody" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SALES RETURN MANAGEMENT (Requirement 8 & Recent Fix) -->
+            <div id="tab-salesReturn" class="tab-content hidden space-y-6">
+                <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border space-y-5">
+                    <div class="border-b pb-4">
+                        <div class="flex flex-wrap justify-between items-center gap-3">
+                            <div>
+                                <h2 class="text-xl font-black text-slate-800 flex items-center gap-2">
+                                    <i class="fa-solid fa-rotate-left text-emerald-600"></i> সেলস রিটার্ন ও স্টক সমন্বয় প্যানেল
+                                </h2>
+                                <p class="text-xs text-slate-500 mt-1">ডিলার কোড লিখে অথবা তারিখ সিলেক্ট করে ডেলিভারিকৃত চালানের রিপোর্ট দেখুন এবং ফেরত পণ্য এন্ট্রি দিন</p>
+                            </div>
+                        </div>
+
+                        <!-- SEARCH & FILTER BAR: DEALER CODE + DEALER SELECT + DATE SELECT -->
+                        <div class="mt-4 bg-slate-50 p-3.5 rounded-xl border border-slate-200 flex flex-wrap items-end gap-3">
+                            <div>
+                                <label class="block text-[11px] font-black text-slate-700 mb-1">
+                                    <i class="fa-solid fa-barcode text-emerald-700 mr-1"></i> ডিলার কোড লিখুন:
+                                </label>
+                                <input type="text" id="srDealerCodeInput" oninput="window.syncSalesReturnDealerInput(this.value)" placeholder="যেমন: 2201" class="w-32 sm:w-40 px-3 py-2 border-2 border-emerald-500 rounded-lg text-sm bg-white font-mono font-bold text-emerald-950 focus:ring-2 focus:ring-emerald-500 focus:outline-none shadow-xs">
+                            </div>
+
+                            <div class="flex-grow min-w-[200px]">
+                                <label class="block text-[11px] font-black text-slate-700 mb-1">
+                                    <i class="fa-solid fa-store text-blue-700 mr-1"></i> অথবা ডিলার ড্রপডাউন:
+                                </label>
+                                <select id="srDealerSelect" onchange="window.syncSalesReturnDealerSelect(this.value)" class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold text-slate-800 shadow-xs"></select>
+                            </div>
+
+                            <div>
+                                <label class="block text-[11px] font-black text-slate-700 mb-1">
+                                    <i class="fa-regular fa-calendar-days text-indigo-700 mr-1"></i> তারিখ সিলেক্ট করুন:
+                                </label>
+                                <input type="date" id="srDateInput" onchange="window.searchDeliveredChallanForReturn(false)" class="px-3 py-2 border rounded-lg text-sm bg-white text-slate-800 font-semibold shadow-xs">
+                            </div>
+
+                            <div class="min-w-[190px]">
+                                <label class="block text-[11px] font-black text-slate-700 mb-1">
+                                    <i class="fa-solid fa-clock-rotate-left text-teal-700 mr-1"></i> ডিলারের চালানের তারিখ:
+                                </label>
+                                <select id="srDeliveryDateDropdown" onchange="window.selectDeliveryDateForReturn(this.value)" class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-semibold text-indigo-800 shadow-xs">
+                                    <option value="">-- সকল তারিখের ডেলিভারি --</option>
+                                </select>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <button type="button" onclick="window.searchDeliveredChallanForReturn(true)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg text-sm shadow flex items-center gap-1.5 transition cursor-pointer">
+                                    <i class="fa-solid fa-magnifying-glass"></i> রিপোর্ট খুঁজুন
+                                </button>
+                                <button type="button" onclick="window.showAllDeliveredForReturn()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold px-3 py-2 rounded-lg text-xs transition cursor-pointer" title="সকল তারিখের ডেলিভারি একসাথে দেখতে ক্লিক করুন">
+                                    <i class="fa-solid fa-list-check mr-1"></i> সকল চালান
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- DEALER INFO CARD -->
+                        <div id="srSelectedDealerCard" class="mt-3 hidden"></div>
+                    </div>
+
+                    <!-- DELIVERED ITEMS REPORT TABLE -->
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <h3 class="text-sm font-black text-slate-800 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-truck-ramp-box text-emerald-600"></i> ডেলিভারিকৃত চালান ও পণ্য রিপোর্ট (Delivered Items Report):
+                                </h3>
+                                <p class="text-xs text-slate-500">নিচের রিপোর্ট থেকে ফেরত দিতে চাওয়া পণ্যের সংখ্যা লিখুন এবং টিক দিয়ে রিটার্নে যোগ করুন</p>
+                            </div>
+                        </div>
+
+                        <div id="srReportTitleInfo" class="hidden"></div>
+
+                        <div class="border rounded-xl overflow-hidden bg-slate-50 shadow-xs">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-200 text-slate-700 font-bold uppercase">
+                                        <th class="p-2.5 text-center w-12">নির্বাচন</th>
+                                        <th class="p-2.5">পণ্য কোড ও নাম</th>
+                                        <th class="p-2.5">চালান নং ও ডেলিভারির তারিখ</th>
+                                        <th class="p-2.5 text-center">ডেলিভারিকৃত সংখ্যা</th>
+                                        <th class="p-2.5 text-center w-36">ফেরত পরিমাণ *</th>
+                                        <th class="p-2.5 text-center">মালের অবস্থা *</th>
+                                        <th class="p-2.5 text-right">কার্যক্রম</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="srItemsTableBody" class="divide-y bg-white">
+                                    <tr><td colspan="7" class="p-8 text-center text-slate-400 font-medium">ডিলার কোড ও তারিখ দিয়ে ডেলিভারি তথ্য খুঁজুন।</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SELECTED SUMMARY & FORM -->
+                    <div class="bg-gradient-to-r from-slate-50 to-emerald-50/40 p-4 sm:p-5 rounded-xl border border-emerald-200 space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-3 border-b pb-3">
+                            <h4 class="font-black text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-file-signature text-emerald-700"></i> সেলস রিটার্ন আবেদন দাখিল ও স্টক সমন্বয় ফরম
+                            </h4>
+                            <div id="srDraftSummaryBox"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">ফেরত আসার কারণ *</label>
+                                <select id="srReason" class="w-full px-3 py-2 border rounded-lg text-xs bg-white font-bold text-slate-800">
+                                    <option value="ড্যামেজ">ড্যামেজ (নষ্ট / ভাঙা মাল)</option>
+                                    <option value="ডিলার গ্রহণ করেনি">ডিলার গ্রহণ করেনি (অতিরিক্ত বা অমিল)</option>
+                                    <option value="মেয়াদোত্তীর্ণ">মেয়াদোত্তীর্ণ (Expired)</option>
+                                    <option value="ভুল পণ্য ডেলিভারি">ভুল পণ্য ডেলিভারি</option>
+                                    <option value="অন্যান্য">অন্যান্য কারণ (নোট বিস্তারিত লিখুন)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">নোট / বিস্তারিত মন্তব্য</label>
+                                <input type="text" id="srNotes" placeholder="ফেরতের কারণ ও বিস্তারিত তথ্য লিখুন" class="w-full px-3 py-2 border rounded-lg text-xs bg-white text-slate-800 font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">চালান / পণ্যের ছবি আপলোড (প্রমাণক)</label>
+                                <input type="file" id="srChallanPhoto" accept="image/*" class="w-full px-2 py-1.5 border rounded-lg text-xs bg-white cursor-pointer file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-2">
+                            <button onclick="window.submitSalesReturnEntry(event)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm shadow-md flex items-center gap-2 transition cursor-pointer">
+                                <i class="fa-solid fa-paper-plane"></i> সেলস রিটার্ন আবেদন দাখিল করুন
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-emerald-600"></i> সেলস রিটার্ন তালিকা ও এডমিন অনুমোদন ট্র্যাকিং
+                    </h3>
+                    <div class="overflow-x-auto border rounded-xl">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                                    <th class="p-3">রিটার্ন আইডি ও তারিখ</th>
+                                    <th class="p-3">ডিলার ও জোন</th>
+                                    <th class="p-3">ফেরত পণ্য ও পরিমাণ</th>
+                                    <th class="p-3">কারণ ও নোট</th>
+                                    <th class="p-3 text-center">চালান ছবি</th>
+                                    <th class="p-3">এন্ট্রি করেছেন</th>
+                                    <th class="p-3">স্ট্যাটাস</th>
+                                    <th class="p-3 text-right">কার্যক্রম</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesReturnTableBody" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: MASTER RECORDS & REPORTS (Requirement 3: Accurate Undelivered & Comprehensive Delivery Reports) -->
+            <div id="tab-records" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex flex-wrap justify-between items-center gap-4 border-b pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800">মাস্টার রিপোর্ট ও কমপ্লিট এক্সপোর্ট</h2>
+                            <p class="text-xs text-slate-500">সেলস ম্যানের আইডিতে নিজ জোন এবং এডমিন আইডিতে সমন্বিত রিপোর্ট</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 items-center">
+                            <select id="reportTimeframe" class="px-3 py-2 border rounded-lg text-sm bg-white font-semibold text-emerald-700">
+                                <option value="daily">দৈনিক রিপোর্ট (Daily)</option>
+                                <option value="weekly">সাপ্তাহিক রিপোর্ট (Weekly)</option>
+                                <option value="monthly" selected>মাসিক রিপোর্ট (Monthly)</option>
+                            </select>
+                            <select id="reportType" onchange="generateMasterReport()" class="px-3 py-2 border rounded-lg text-sm bg-white font-medium text-slate-700">
+                                <option value="dealerUndelivered">ডিলারভিত্তিক আনডেলিভারড রিপোর্ট (Accurate Undelivered)</option>
+                                <option value="dealerDelivery">ডিলারভিত্তিক ডেলিভারি রিপোর্ট (Complete Delivery Report)</option>
+                                <option value="dealerMoneyDue">ডিলারভিত্তিক মানি কালেকশন ও ডিউ রিপোর্ট</option>
+                                <option value="salesTargetAchieve">সেলসম্যান টার্গেট, অর্জন ও পেন্ডিং রিপোর্ট</option>
+                            </select>
+                            <button onclick="generateMasterReport()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow cursor-pointer">রিপোর্ট জেনারেট করুন</button>
+                            <button onclick="printContent('masterReportContainer', 'মাস্টার রিপোর্ট')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg shadow flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-print"></i> প্রিন্ট রিপোর্ট</button>
+                            <button onclick="exportTableToCSV('masterReportContainer', 'Master_Report')" class="bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow flex items-center gap-1 cursor-pointer"><i class="fa-solid fa-file-csv"></i> CSV এক্সপোর্ট</button>
+                        </div>
+                    </div>
+                    <div id="masterReportContainer" class="overflow-x-auto min-h-[250px] bg-slate-50 p-4 rounded-xl border">
+                        <p class="text-center text-slate-400 py-10">রিপোর্ট দেখতে ওপরের অপশন থেকে সিলেক্ট করে জেনারেট করুন।</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: DEALER DEDICATED PORTAL -->
+            <div id="tab-dealerPortal" class="tab-content hidden space-y-6">
+                <div class="bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 text-white rounded-2xl p-5 shadow-lg border border-emerald-700">
+                    <div class="flex flex-wrap justify-between items-center gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-white/10 backdrop-blur border border-white/20 flex items-center justify-center text-white text-2xl shadow shrink-0">
+                                <i class="fa-solid fa-store"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="bg-amber-400 text-slate-950 text-xs font-black font-mono px-2.5 py-0.5 rounded shadow-xs">ডিলার কোড: <span id="dlrPortalCode">----</span></span>
+                                    <h2 class="text-xl sm:text-2xl font-black" id="dlrPortalName">ডিলার পোর্টাল</h2>
+                                </div>
+                                <p class="text-xs text-emerald-100 mt-1 flex items-center gap-3 flex-wrap">
+                                    <span><i class="fa-solid fa-location-dot text-amber-300 mr-1"></i> <span id="dlrPortalLocation">ঢাকা</span></span>
+                                    <span><i class="fa-solid fa-phone text-emerald-300 mr-1"></i> <span id="dlrPortalPhone">----</span></span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="bg-white/10 backdrop-blur border border-white/20 px-4 py-2.5 rounded-xl text-right shadow">
+                            <span class="text-[10px] uppercase font-bold tracking-wider text-emerald-200 block">জমা / ক্রেডিট ব্যালেন্স</span>
+                            <h3 class="text-lg font-black text-amber-300" id="dlrPortalCredit">৳ ০</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl shadow-sm border p-4 sm:p-6 space-y-4">
+                    <div class="border-b flex overflow-x-auto gap-2 pb-2">
+                        <button onclick="switchDealerSubTab('orders')" id="dlrSubTabBtn-orders" class="px-4 py-2 border-b-2 font-bold text-sm text-emerald-700 border-emerald-600 bg-emerald-50 rounded-t-lg transition flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fa-solid fa-cart-shopping"></i> ১. আমার অর্ডারকৃত পণ্যের তালিকা
+                        </button>
+                        <button onclick="switchDealerSubTab('delivered')" id="dlrSubTabBtn-delivered" class="px-4 py-2 border-b-2 font-semibold text-sm text-slate-600 border-transparent hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fa-solid fa-truck-ramp-box"></i> ২. ডেলিভারিকৃত পণ্যের তালিকা ও চালান
+                        </button>
+                        <button onclick="switchDealerSubTab('pending')" id="dlrSubTabBtn-pending" class="px-4 py-2 border-b-2 font-semibold text-sm text-slate-600 border-transparent hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fa-solid fa-hourglass-half"></i> ৩. বাকি থাকা পণ্যের তালিকা
+                        </button>
+                        <button onclick="switchDealerSubTab('ledger')" id="dlrSubTabBtn-ledger" class="px-4 py-2 border-b-2 font-semibold text-sm text-slate-600 border-transparent hover:text-slate-800 transition flex items-center gap-1.5 whitespace-nowrap">
+                            <i class="fa-solid fa-file-invoice-dollar"></i> ৪. হিসাব ও লেজার রিপোর্ট
+                        </button>
+                    </div>
+
+                    <div id="dlrSubTabContent-orders" class="space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base">আমার অর্ডারকৃত পণ্যের তালিকা</h3>
+                                <p class="text-xs text-slate-500">আপনার কোম্পানির কাছে দাখিলকৃত সকল অর্ডারের তালিকা, বিল ও পেমেন্ট বিবরণ</p>
+                            </div>
+                            <button onclick="printContent('printableDealerOrdersArea', 'ডিলার অর্ডার তালিকা')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow flex items-center gap-1">
+                                <i class="fa-solid fa-print"></i> অর্ডার রিপোর্ট প্রিন্ট
+                            </button>
+                        </div>
+                        <div class="border rounded-xl overflow-x-auto bg-white" id="printableDealerOrdersArea">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b">
+                                        <th class="p-3">অর্ডার আইডি</th>
+                                        <th class="p-3">তারিখ</th>
+                                        <th class="p-3">আইটেম ও পরিমাণ</th>
+                                        <th class="p-3">মোট বিল (৳)</th>
+                                        <th class="p-3">পরিশোধ (৳)</th>
+                                        <th class="p-3">বাকি (Due)</th>
+                                        <th class="p-3 text-center">ডেলিভারি স্ট্যাটাস</th>
+                                        <th class="p-3 text-right">ইনভয়েস</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dlrOrdersTableBody" class="divide-y"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="dlrSubTabContent-delivered" class="hidden space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base">ডেলিভারিকৃত পণ্যের তালিকা ও ফ্যাক্টরি চালান</h3>
+                                <p class="text-xs text-slate-500">ফ্যাক্টরি থেকে আপনার কাছে পাঠানো সকল চালানের অনুলিপি ও পণ্য বিবরণ</p>
+                            </div>
+                            <button onclick="printContent('printableDealerDeliveredArea', 'ডিলার ডেলিভারি ও চালান রিপোর্ট')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow flex items-center gap-1">
+                                <i class="fa-solid fa-print"></i> চালান রিপোর্ট প্রিন্ট
+                            </button>
+                        </div>
+                        <div class="border rounded-xl overflow-x-auto bg-white" id="printableDealerDeliveredArea">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b">
+                                        <th class="p-3">চালান নং</th>
+                                        <th class="p-3">তারিখ ও সময়</th>
+                                        <th class="p-3">ডেলিভারিকৃত পণ্যসমূহ</th>
+                                        <th class="p-3 text-center">মোট পরিমাণ</th>
+                                        <th class="p-3">পরিবহন নোট</th>
+                                        <th class="p-3 text-right">চালান কপি</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dlrDeliveredTableBody" class="divide-y"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="dlrSubTabContent-pending" class="hidden space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                    <span>বাকি থাকা (পেন্ডিং) পণ্যের তালিকা</span>
+                                    <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full font-bold">মোট অবশিষ্ট: <span id="dlrPendingTotalQty">০ টি</span></span>
+                                </h3>
+                                <p class="text-xs text-slate-500">আপনার অর্ডারের যেসকল পণ্য এখনও ফ্যাক্টরি থেকে ডেলিভারি পাওয়া বাকি রয়েছে</p>
+                            </div>
+                            <button onclick="printContent('printableDealerPendingArea', 'ডিলার বাকি থাকা পণ্যের তালিকা')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow flex items-center gap-1">
+                                <i class="fa-solid fa-print"></i> পেন্ডিং রিপোর্ট প্রিন্ট
+                            </button>
+                        </div>
+                        <div class="border rounded-xl overflow-x-auto bg-white" id="printableDealerPendingArea">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b">
+                                        <th class="p-3 text-center w-12">#</th>
+                                        <th class="p-3">প্রোডাক্ট কোড ও নাম</th>
+                                        <th class="p-3">অর্ডার আইডি</th>
+                                        <th class="p-3">অর্ডারের তারিখ</th>
+                                        <th class="p-3 text-center bg-amber-50 text-amber-900 font-bold">অবশিষ্ট পেন্ডিং পরিমাণ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dlrPendingTableBody" class="divide-y"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="dlrSubTabContent-ledger" class="hidden space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-2">
+                            <div>
+                                <h3 class="font-bold text-slate-800 text-base">হিসাব ও একাউন্টস লেজার রিপোর্ট</h3>
+                                <p class="text-xs text-slate-500">আপনার মোট কেনাকাটা, পেমেন্ট আদায় ও অবশিষ্ট বকেয়ার সমন্বিত লেজার বিবরণ</p>
+                            </div>
+                            <button onclick="printContent('printableDealerLedgerArea', 'ডিলার লেজার ও হিসাব বিবরণী')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-1.5">
+                                <i class="fa-solid fa-print"></i> লেজার স্টেটমেন্ট প্রিন্ট করুন
+                            </button>
+                        </div>
+
+                        <div id="printableDealerLedgerArea" class="space-y-4">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                                <div class="bg-blue-50 border border-blue-200 rounded-xl p-3.5 shadow-xs">
+                                    <span class="text-[11px] text-blue-700 font-bold uppercase block">সর্বমোট বিল</span>
+                                    <h4 class="text-lg font-black text-blue-900 mt-1" id="dlrLedgerTotalBill">৳ ০</h4>
+                                </div>
+                                <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 shadow-xs">
+                                    <span class="text-[11px] text-emerald-700 font-bold uppercase block">মোট পরিশোধ</span>
+                                    <h4 class="text-lg font-black text-emerald-800 mt-1" id="dlrLedgerTotalPaid">৳ ০</h4>
+                                </div>
+                                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 shadow-xs">
+                                    <span class="text-[11px] text-amber-700 font-bold uppercase block">মোট বকেয়া (Due)</span>
+                                    <h4 class="text-lg font-black text-amber-700 mt-1" id="dlrLedgerTotalDue">৳ ০</h4>
+                                </div>
+                                <div class="bg-purple-50 border border-purple-200 rounded-xl p-3.5 shadow-xs">
+                                    <span class="text-[11px] text-purple-700 font-bold uppercase block">জমা / ক্রেডিট ব্যালেন্স</span>
+                                    <h4 class="text-lg font-black text-purple-800 mt-1" id="dlrLedgerCreditBal">৳ ০</h4>
+                                </div>
+                            </div>
+
+                            <div class="border rounded-xl overflow-x-auto bg-white">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b">
+                                            <th class="p-2.5 text-center w-10">#</th>
+                                            <th class="p-2.5">তারিখ</th>
+                                            <th class="p-2.5">অর্ডার রেফারেন্স</th>
+                                            <th class="p-2.5 text-right">বিল টাকা (৳)</th>
+                                            <th class="p-2.5 text-right">আদায় / পরিশোধ (৳)</th>
+                                            <th class="p-2.5 text-right">বাকি ব্যালেন্স (৳)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dlrLedgerTableBody" class="divide-y"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: PROFILE & LEDGER -->
+            <div id="tab-profile" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 text-center space-y-2">
+                        <div class="w-16 h-16 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <h3 id="profName" class="font-bold text-lg text-slate-800">নাম</h3>
+                        <p id="profRoleZone" class="text-xs text-emerald-700 font-semibold uppercase">রোল ও জোন</p>
+                    </div>
+                    <div class="md:col-span-2 space-y-4 bg-slate-50 p-4 rounded-xl border">
+                        <h3 class="font-bold text-slate-700 border-b pb-2">আমার লেজার ও সেলস সারসংক্ষেপ</h3>
+                        <div id="profileLedgerContent" class="space-y-2 text-sm"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex flex-wrap justify-between items-center gap-3 border-b pb-3">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-umbrella-beach text-emerald-600"></i> ছুটির আবেদন ও স্ট্যাটাস (Leave Applications)
+                            </h3>
+                            <p class="text-xs text-slate-500">ছুটির আবেদন করুন এবং এডমিন অনুমোদনের আগে প্রয়োজনে এডিট বা পরিবর্তন করুন</p>
+                        </div>
+                        <button onclick="window.openLeaveFormModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 rounded-lg shadow flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-plus-circle"></i> নতুন ছুটির আবেদন ফরম
+                        </button>
+                    </div>
+                    <div id="profileLeaveContainer" class="space-y-3">
+                        <p class="text-xs text-slate-400 py-3 text-center">লোড হচ্ছে...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: ADMIN DASHBOARD & SALES PERSONS -->
+            <div id="tab-adminPanel" class="tab-content hidden space-y-6">
+                <div class="bg-white p-4 rounded-xl shadow-sm border flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-slate-800"><i class="fa-solid fa-user-gear mr-2 text-emerald-600"></i>সেলস পার্সন ও ইউজার কন্ট্রোল প্যানেল (Admin Only)</h2>
+                    <div class="flex space-x-2">
+                        <button onclick="openSalesPersonModal()" class="bg-emerald-600 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow"><i class="fa-solid fa-user-plus mr-1"></i> নতুন সেলস পার্সন যুক্ত করুন</button>
+                        <button onclick="openSalesTargetModal()" class="bg-purple-600 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow"><i class="fa-solid fa-bullseye mr-1"></i> সেলস টার্গেট ও অর্জন এন্ট্রি</button>
+                        <button onclick="openUserCreateModal()" class="bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg shadow">অন্যান্য ইউজার আইডি</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center justify-between">
+                        <span>ডিলার ও সেলস পিপল টার্গেট ও অ্যাচিভমেন্ট মূল্যায়ন বোর্ড (Admin Control)</span>
+                        <span class="text-xs text-emerald-600 font-semibold">মাসিক পারফরম্যান্স ট্র্যাকিং</span>
+                    </h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                    <th class="p-2">নাম ও ক্যাটাগরি (সেলসম্যান / ডিলার)</th>
+                                    <th class="p-2">জোন</th>
+                                    <th class="p-2">মাসিক টার্গেট (৳)</th>
+                                    <th class="p-2">অর্জন / কালেকশন (৳)</th>
+                                    <th class="p-2">অ্যাচিভমেন্ট পেন্ডিং (৳)</th>
+                                    <th class="p-2">স্ট্যাটাস / গ্রেড</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminEvaluationTableBody" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base">সংযুক্ত সেলস পার্সন তালিকা (বিস্তারিত তথ্য ও পারমিশন)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                    <th class="p-2">ছবি</th>
+                                    <th class="p-2">আইডি & নাম</th>
+                                    <th class="p-2">ডেজিগনেশন & জোন</th>
+                                    <th class="p-2">মোবাইল নম্বর</th>
+                                    <th class="p-2">এনআইডি নম্বর</th>
+                                    <th class="p-2">বেতন</th>
+                                    <th class="p-2">স্ট্যাটাস</th>
+                                    <th class="p-2 text-right">অ্যাকশন</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesPersonTableBody" class="divide-y"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-800 text-base">সেলস পিপল লাইভ আবেদন (ছুটি ও অন্যান্য অনুমোদন)</h3>
+                        <button onclick="openLeaveApplyModal()" class="bg-teal-600 text-white text-xs px-3 py-1.5 rounded shadow">নতুন আবেদন করুন (Employee)</button>
+                    </div>
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                <th class="p-2">আবেদনকারী</th>
+                                <th class="p-2">আবেদনের বিবরণ (ছুটি/লিভ)</th>
+                                <th class="p-2">তারিখ</th>
+                                <th class="p-2">স্ট্যাটাস</th>
+                                <th class="p-2 text-right">অনুমোদন (Admin)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="liveAppTableBody" class="divide-y"></tbody>
+                    </table>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base">সিস্টেম ইউজার অ্যাকাউন্টস</h3>
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                <th class="p-2">নাম</th>
+                                <th class="p-2">রোল ও জোন</th>
+                                <th class="p-2">ইউজারনেম ও পাসওয়ার্ড</th>
+                                <th class="p-2 text-right">কার্যক্রম</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody" class="divide-y"></tbody>
+                    </table>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl shadow-sm border space-y-4">
+                    <h3 class="font-bold text-slate-800 text-base">ডিলার আবেদন রিভিউ ও অনুমোদন</h3>
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase font-semibold">
+                                <th class="p-2">কোড ও নাম</th>
+                                <th class="p-2">জোন</th>
+                                <th class="p-2">আবেদনকারী</th>
+                                <th class="p-2 text-right">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dealerAppTableBody" class="divide-y"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Image Zoom Modal -->
+    <div id="imageZoomModal" class="fixed inset-0 bg-slate-900/80 z-50 hidden flex items-center justify-center p-4" onclick="closeImageZoom()">
+        <div class="relative max-w-3xl w-full bg-white p-2 rounded-xl shadow-2xl text-center" onclick="event.stopPropagation()">
+            <button onclick="closeImageZoom()" class="absolute -top-4 -right-4 bg-red-600 text-white w-8 h-8 rounded-full font-bold shadow-lg flex items-center justify-center">×</button>
+            <img id="zoomedImg" src="" class="max-h-[80vh] mx-auto object-contain rounded-lg">
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">নতুন অর্ডার এন্ট্রি</h3>
+            <form id="orderForm" onsubmit="saveOrder(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">ডিলার নির্বাচন করুন (জোন ও স্ট্যাটাস যাচাই)</label>
+                    <select id="ordDealerSelect" onchange="checkSelectedDealerForOrder()" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-medium"></select>
+                </div>
+                <div id="orderDealerWarning" class="hidden p-3 rounded-lg text-xs bg-red-50 border border-red-200 text-red-700"></div>
+
+                <div class="space-y-2 border p-3 rounded-xl bg-slate-50">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold uppercase text-slate-600">কোড, নাম, Quantity ও একক</span>
+                        <button type="button" onclick="addOrderItemRow()" class="bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-xs font-semibold shadow hover:bg-emerald-700">+ আইটেম যোগ করুন</button>
+                    </div>
+                    <div id="orderItemsContainer" class="space-y-2"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-3 bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-center">
+                    <div>
+                        <span class="text-[10px] text-slate-600 font-bold uppercase">মোট বিল (৳)</span>
+                        <h4 id="liveTotalBill" class="text-base font-bold text-emerald-800">৳ ০</h4>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-600 font-bold uppercase mb-1">নগদ কালেকশন (৳)</label>
+                        <input type="number" id="ordCollection" value="0" oninput="calculateOrderLiveTotal()" required class="w-full px-2 py-1 border rounded text-sm bg-white text-center font-bold text-emerald-700">
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-600 font-bold uppercase">বাকি (Due ৳)</span>
+                        <h4 id="liveDueAmount" class="text-base font-bold text-amber-600">৳ ০</h4>
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('orderModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow">অর্ডার প্লেস করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dealer Direct Modal -->
+    <div id="dealerModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 id="dealerModalTitle" class="text-lg font-bold text-slate-800 border-b pb-2">ডিলার যোগ করুন (Admin)</h3>
+            <form id="dealerForm" onsubmit="saveDealerDirect(event)" class="space-y-3">
+                <input type="text" id="dlrCode" required placeholder="ডিলার কোড (যেমন: 2205)" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="dlrName" required placeholder="ডিলার নাম/ফার্ম" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="dlrChairman" required placeholder="চেয়ারম্যান/এমডি/প্রোপাইটর নাম" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">জোন নির্ধারণ</label>
+                    <select id="dlrZone" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">স্ট্যাটাস নির্বাচন</label>
+                    <select id="dlrStatus" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-semibold">
+                        <option value="Active">সক্রিয় (Active)</option>
+                        <option value="Inactive">নিষ্ক্রিয় (Inactive)</option>
+                    </select>
+                </div>
+                <input type="text" id="dlrMobile" required placeholder="মোবাইল নম্বর" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="dlrAddress" required placeholder="সম্পূর্ণ ঠিকানা" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ডিলারের ছবি আপলোড করুন (ঐচ্ছিক)</label>
+                    <input type="file" id="dlrImageFile" accept="image/*" class="w-full px-3 py-1.5 border rounded-lg text-xs bg-slate-50 cursor-pointer">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('dealerModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold shadow">সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sales Target Entry Modal -->
+    <div id="salesTargetModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">সেলসম্যান/ডিলার মাসিক টার্গেট ও অর্জন এন্ট্রি</h3>
+            <form onsubmit="saveSalesTarget(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">নাম নির্বাচন করুন</label>
+                    <select id="stName" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ক্যাটাগরি</label>
+                    <select id="stCategory" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                        <option value="SalesPerson">সেলস পার্সন (Sales Person)</option>
+                        <option value="Dealer">ডিলার (Dealer)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">জোন</label>
+                    <input type="text" id="stZone" required placeholder="জোন (যেমন: ঢাকা)" class="w-full px-3 py-2 border rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">মাসিক টার্গেট (৳)</label>
+                    <input type="number" id="stTarget" required placeholder="৳" class="w-full px-3 py-2 border rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">বর্তমান অর্জন / কালেকশন (৳)</label>
+                    <input type="number" id="stAchieved" required placeholder="৳" class="w-full px-3 py-2 border rounded-lg text-sm">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('salesTargetModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold">সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sales Person Add/Edit Modal -->
+    <div id="salesPersonModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 id="spModalTitle" class="text-lg font-bold text-slate-800 border-b pb-2">সেলস পার্সন যুক্ত করুন (Admin Only)</h3>
+            <form id="salesPersonForm" onsubmit="saveSalesPerson(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600">সেলস পার্সন আইডি</label>
+                        <input type="text" id="spId" required placeholder="যেমন: 9903" class="w-full px-3 py-1.5 border rounded text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600">পূর্ণ নাম</label>
+                        <input type="text" id="spName" required placeholder="নাম" class="w-full px-3 py-1.5 border rounded text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600">ডেজিগনেশন</label>
+                        <input type="text" id="spDesignation" required placeholder="Territory Sales Officer" class="w-full px-3 py-1.5 border rounded text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600">পোস্টিং জোন</label>
+                        <select id="spZone" required class="w-full px-3 py-1.5 border rounded text-sm bg-white"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600">কোম্পানি মোবাইল নম্বর</label>
+                        <input type="text" id="spCompMobile" required placeholder="017..." class="w-full px-3 py-1.5 border rounded text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600">ন্যাশনাল আইডি (NID)</label>
+                        <input type="text" id="spNid" required placeholder="NID No" class="w-full px-3 py-1.5 border rounded text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600">বেতন (Salary)</label>
+                        <input type="number" id="spSalary" required placeholder="৳" class="w-full px-3 py-1.5 border rounded text-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('salesPersonModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold">সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Print Invoice Modal -->
+    <div id="printModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div id="printableArea" class="space-y-4 text-slate-800">
+                <div class="text-center border-b pb-4">
+                    <h2 class="text-2xl font-bold text-emerald-800">BCarebd.Com</h2>
+                    <p class="text-xs text-slate-500">ভেটেরিনারি অ্যানিম্যাল মেডিসিন প্রস্তুতকারক প্রতিষ্ঠান</p>
+                    <p class="text-xs text-slate-500">জোন: <span id="printZone"></span></p>
+                </div>
+                <div class="flex justify-between text-xs font-semibold">
+                    <div>
+                        <p><b>অর্ডার আইডি:</b> <span id="printOrdId"></span></p>
+                        <p><b>তারিখ:</b> <span id="printDate"></span></p>
+                    </div>
+                    <div class="text-right">
+                        <p><b>ডিলার নাম:</b> <span id="printDlrName"></span></p>
+                    </div>
+                </div>
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-100 border">
+                            <th class="p-2">আইটেম কোড ও নাম</th>
+                            <th class="p-2 text-center">কোয়ান্টিটি</th>
+                            <th class="p-2 text-center">ইউনিট রেট (৳)</th>
+                            <th class="p-2 text-right">মোট (৳)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="printItemTableBody" class="divide-y"></tbody>
+                </table>
+                <div class="text-right space-y-1 text-xs pt-2 border-t">
+                    <p>মোট বিল: <b id="printTotalBill"></b></p>
+                    <p>নগদ কালেকশন: <b id="printCollection" class="text-emerald-700"></b></p>
+                    <p>বাকি (Due): <b id="printDue" class="text-amber-600"></b></p>
+                </div>
+            </div>
+            <div class="flex justify-end space-x-2 pt-4 border-t">
+                <button onclick="closeModal('printModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বন্ধ করুন</button>
+                <button onclick="printContent('printableArea', 'অর্ডার ইনভয়েস')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow"><i class="fa-solid fa-print mr-1"></i> প্রিন্ট করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User & Credential Management Modal -->
+    <div id="userCreateModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">অন্যান্য ইউজার আইডি ও পাসওয়ার্ড সেটআপ</h3>
+            <form id="userCreateForm" onsubmit="saveNewUserCredential(event)" class="space-y-3">
+                <input type="text" id="ucName" required placeholder="নাম" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <select id="ucRole" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                    <option value="employee">সেলস ম্যান (Employee)</option>
+                    <option value="dealer">ডিলার (Dealer)</option>
+                    <option value="factory">ফ্যাক্টরি ম্যানেজার</option>
+                    <option value="accounts">একাউন্টস</option>
+                </select>
+                <select id="ucZone" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white"></select>
+                <input type="text" id="ucUsername" required placeholder="ইউজারনেম (Login ID)" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="password" id="ucPassword" required placeholder="পাসওয়ার্ড" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('userCreateModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold">সংরক্ষণ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePassModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2">পাসওয়ার্ড পরিবর্তন করুন</h3>
+            <form id="changePassForm" onsubmit="processPasswordChange(event)" class="space-y-3">
+                <input type="text" id="cpUsername" required placeholder="আপনার ইউজারনেম" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="password" id="cpOldPass" required placeholder="পূর্বের পাসওয়ার্ড" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="password" id="cpNewPass" required placeholder="নতুন পাসওয়ার্ড" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('changePassModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold">পরিবর্তন করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notice Modal -->
+    <div id="noticeModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-bullhorn text-amber-500"></i> নোটিস বোর্ড পরিবর্তন ও সম্পাদনা
+                </h3>
+                <button type="button" onclick="closeModal('noticeModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">নোটিশের বিবরণ:</label>
+                <textarea id="newNoticeInput" rows="4" required placeholder="এখানে নোটিশ লিখুন..." class="w-full px-3 py-2.5 border-2 border-emerald-500 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-400 shadow-inner leading-relaxed"></textarea>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2 border-t">
+                <button type="button" onclick="closeModal('noticeModal')" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold">বাতিল</button>
+                <button onclick="saveNewNotice()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-floppy-disk"></i> আপডেট ও সেভ করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 id="productModalTitle" class="text-lg font-bold text-slate-800 border-b pb-2">প্রোডাক্ট যোগ করুন</h3>
+            <form id="productForm" onsubmit="saveProduct(event)" class="space-y-3">
+                <input type="hidden" id="prodEditIndex" value="-1">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">প্রোডাক্ট কোড</label>
+                    <input type="text" id="prodCode" required placeholder="প্রোডাক্ট কোড (যেমন: 8804)" class="w-full px-3 py-2 border rounded-lg text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">প্রোডাক্টের নাম</label>
+                    <input type="text" id="prodName" required placeholder="প্রোডাক্ট নাম" class="w-full px-3 py-2 border rounded-lg text-sm">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">একক</label>
+                        <select id="prodUnit" required class="w-full px-2 py-2 border rounded-lg text-sm bg-white">
+                            <option value="পিস">পিস</option>
+                            <option value="লিটার">লিটার</option>
+                            <option value="কেজি">কেজি</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">রেট (৳)</label>
+                        <input type="number" id="prodRate" required placeholder="রেট" class="w-full px-2 py-2 border rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">স্টক</label>
+                        <input type="number" id="prodStock" required placeholder="স্টক" class="w-full px-2 py-2 border rounded-lg text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">প্রোডাক্টের ছবি আপলোড করুন</label>
+                    <input type="file" id="prodImageFile" accept="image/*" class="w-full px-3 py-1.5 border rounded-lg text-xs bg-slate-50 cursor-pointer">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('productModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold shadow">সেভ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dealer Application Modal -->
+    <div id="dealerAppModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-store text-teal-600"></i> ডিলার আবেদন ফরম
+            </h3>
+            <form id="dealerAppForm" onsubmit="submitDealerApp(event)" class="space-y-3">
+                <input type="text" id="appDlrCode" required placeholder="ডিলার কোড (যেমন: 2216)" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="appDlrName" required placeholder="ডিলার নাম/ফার্ম" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="appDlrChairman" required placeholder="চেয়ারম্যান/এমডি/প্রোপাইটর নাম" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">জোন নির্ধারণ</label>
+                    <select id="appDlrZone" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-semibold text-emerald-800"></select>
+                </div>
+                <input type="text" id="appDlrMobile" required placeholder="মোবাইল নম্বর" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <input type="text" id="appDlrAddress" required placeholder="সম্পূর্ণ ঠিকানা" class="w-full px-3 py-2 border rounded-lg text-sm">
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('dealerAppModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold shadow">আবেদন সাবমিট করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Challan Print & View Modal -->
+    <div id="challanPrintModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div id="challanPrintArea" class="space-y-4 text-slate-800 p-2">
+                <div class="text-center border-b pb-3">
+                    <h2 class="text-2xl font-black text-emerald-800">BCarebd.Com</h2>
+                    <p class="text-xs text-slate-600 font-semibold">ভেটেরিনারি অ্যানিম্যাল মেডিসিন প্রস্তুতকারক প্রতিষ্ঠান</p>
+                    <div class="inline-block bg-emerald-800 text-white font-bold px-4 py-1 rounded-full text-xs uppercase tracking-wider mt-1.5">
+                        ফ্যাক্টরি ডেলিভারি চালান ও গেটপাস
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-emerald-50/80 to-blue-50/80 p-3.5 rounded-xl border border-emerald-300 text-xs grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <span class="bg-emerald-800 text-white font-mono font-black px-2.5 py-0.5 rounded text-xs uppercase tracking-wider shadow-xs">ডিলার কোড: <span id="cpDealerCode">----</span></span>
+                            <span id="cpCopyBadge"></span>
+                        </div>
+                        <p class="text-sm font-black text-slate-900 mt-1"><b>ডিলার নাম:</b> <span id="cpDealerName"></span></p>
+                        <p class="text-xs text-slate-800 font-semibold"><b><i class="fa-solid fa-location-dot text-red-500 mr-1"></i>ডেলিভারি লোকেশন:</b> <span id="cpDealerLocation" class="text-blue-900 font-bold"></span></p>
+                        <p class="text-[11px] text-slate-600" id="cpDealerContact"></p>
+                        <p class="text-[10px] text-slate-500 hidden" id="cpDealerCodeZone"></p>
+                    </div>
+                    <div class="text-left sm:text-right space-y-1 flex flex-col justify-center sm:border-l sm:pl-3 border-emerald-200">
+                        <p><b>চালান নং:</b> <span id="cpChallanId" class="font-bold text-emerald-800 font-mono text-sm"></span></p>
+                        <p><b>তারিখ ও সময়:</b> <span id="cpTimestamp" class="font-bold text-indigo-700"></span></p>
+                        <p><b>প্রস্তুতকারক:</b> <span id="cpPreparedBy" class="font-medium text-slate-700"></span></p>
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <h4 class="text-xs font-bold text-slate-700 uppercase flex items-center gap-1">
+                        <i class="fa-solid fa-truck-ramp-box text-emerald-600"></i> এই চালানে প্রেরিত পণ্যের বিবরণ:
+                    </h4>
+                    <table class="w-full text-left border-collapse text-xs border">
+                        <thead>
+                            <tr class="bg-slate-100 border-b">
+                                <th class="p-2 border-r">আইটেম কোড ও নাম</th>
+                                <th class="p-2 border-r">সংশ্লিষ্ট অর্ডার ও বিবরণ</th>
+                                <th class="p-2 text-center border-r">একক</th>
+                                <th class="p-2 text-center border-r">পরিমাণ</th>
+                                <th class="p-2 text-right border-r">একক রেট (৳)</th>
+                                <th class="p-2 text-right">মোট মূল্য (৳)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cpItemsTableBody" class="divide-y"></tbody>
+                        <tfoot>
+                            <tr class="bg-slate-50 font-bold border-t">
+                                <td colspan="3" class="p-2 text-right border-r">সর্বমোট ডেলিভারি সংখ্যা ও মূল্য:</td>
+                                <td id="cpTotalQty" class="p-2 text-center border-r text-emerald-700"></td>
+                                <td class="p-2 border-r"></td>
+                                <td id="cpTotalAmount" class="p-2 text-right text-emerald-800"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="space-y-1 pt-2">
+                    <div class="bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                        <h4 class="text-xs font-bold text-amber-900 flex items-center gap-1.5 uppercase">
+                            <i class="fa-solid fa-hourglass-half text-amber-700"></i> ডিলারের অবশিষ্ট পেন্ডিং ডেলিভারি তালিকা:
+                        </h4>
+                    </div>
+                    <div id="cpRemainingContainer" class="border rounded-lg overflow-hidden">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 border-b">
+                                    <th class="p-2 border-r">পেন্ডিং প্রোডাক্ট কোড ও নাম</th>
+                                    <th class="p-2 border-r">সংশ্লিষ্ট অর্ডার আইডি</th>
+                                    <th class="p-2 border-r">অর্ডারের তারিখ</th>
+                                    <th class="p-2 text-center">অবশিষ্ট পেন্ডিং পরিমাণ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cpRemainingTableBody" class="divide-y bg-white"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="cpNotesDiv" class="p-2 bg-slate-50 border rounded text-xs text-slate-600 hidden"></div>
+
+                <div class="grid grid-cols-3 gap-6 pt-10 text-center text-xs font-semibold text-slate-700">
+                    <div class="border-t pt-1">চালান প্রস্তুতকারক স্বাক্ষর<br><span class="text-[10px] text-slate-400">(ফ্যাক্টরি ইনচার্জ)</span></div>
+                    <div class="border-t pt-1">পরিবহন / ডেলিভারিম্যান<br><span class="text-[10px] text-slate-400">(গেট পাস অফিসার)</span></div>
+                    <div class="border-t pt-1">গ্রহীতার স্বাক্ষর ও সিল<br><span class="text-[10px] text-slate-400">(ডিলার / প্রতিনিধি)</span></div>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-2 pt-3 border-t">
+                <button onclick="closeModal('challanPrintModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold">বন্ধ করুন</button>
+                <button onclick="printContent('challanPrintArea', 'ফ্যাক্টরি ডেলিভারি চালান')" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow flex items-center gap-1.5">
+                    <i class="fa-solid fa-print"></i> চালান প্রিন্ট করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Master Modification Center Modal -->
+    <div id="masterModifyModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-indigo-600"></i> মাস্টার পরিবর্তন ও নিয়ন্ত্রণ কেন্দ্র (Admin Control)
+                </h3>
+                <button onclick="closeModal('masterModifyModal')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">×</button>
+            </div>
+
+            <div class="flex border-b space-x-2">
+                <button onclick="switchMasterModifyTab('product')" id="mmTabBtn-product" class="px-4 py-2 border-b-2 font-bold text-sm text-indigo-600 border-indigo-600">
+                    <i class="fa-solid fa-capsules mr-1"></i> ১। প্রোডাক্ট পরিবর্তন
+                </button>
+                <button onclick="switchMasterModifyTab('dealer')" id="mmTabBtn-dealer" class="px-4 py-2 border-b-2 font-semibold text-sm text-slate-600 border-transparent hover:text-slate-800">
+                    <i class="fa-solid fa-store mr-1"></i> ২। ডিলার পরিবর্তন
+                </button>
+                <button onclick="switchMasterModifyTab('salesPerson')" id="mmTabBtn-salesPerson" class="px-4 py-2 border-b-2 font-semibold text-sm text-slate-600 border-transparent hover:text-slate-800">
+                    <i class="fa-solid fa-user-tie mr-1"></i> ৩। সেলস পার্সন পরিবর্তন
+                </button>
+                <button onclick="switchMasterModifyTab('staff')" id="mmTabBtn-staff" class="px-4 py-2 border-b-2 font-semibold text-sm text-slate-600 border-transparent hover:text-slate-800">
+                    <i class="fa-solid fa-users-gear mr-1"></i> ৪। অফিস স্টাফ পরিবর্তন
+                </button>
+            </div>
+
+            <div id="masterModifyContentArea" class="space-y-4 min-h-[300px]"></div>
+        </div>
+    </div>
+
+    <!-- Admin Change User Password Modal -->
+    <div id="adminChangeUserPassModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-800 border-b pb-2 flex items-center gap-2">
+                <i class="fa-solid fa-key text-indigo-600"></i> ইউজার পাসওয়ার্ড পরিবর্তন (Admin Control)
+            </h3>
+            <form onsubmit="saveAdminUserPass(event)" class="space-y-3">
+                <input type="hidden" id="adminCpUsername">
+                <div class="bg-slate-50 p-3 rounded-lg border text-xs space-y-1.5">
+                    <p><b>ইউজার:</b> <span id="adminCpName" class="text-slate-800 font-semibold"></span></p>
+                    <p><b>বর্তমান পাসওয়ার্ড:</b> <code id="adminCpCurrentPass" class="bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded font-bold font-mono"></code></p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">নতুন পাসওয়ার্ড সেট করুন</label>
+                    <input type="text" id="adminCpNewPass" required placeholder="নতুন পাসওয়ার্ড লিখুন" class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-mono">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('adminChangeUserPassModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বাতিল</button>
+                    <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow">পাসওয়ার্ড সেভ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Center Modal -->
+    <div id="notificationModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-bell text-emerald-600"></i> নোটিফিকেশন সেন্টার
+                </h3>
+                <button onclick="closeModal('notificationModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <div id="notificationListContainer" class="flex-grow overflow-y-auto space-y-2 py-1 pr-1 max-h-[60vh]"></div>
+            <div class="flex justify-between items-center pt-2 border-t text-xs">
+                <button onclick="markAllNotificationsRead()" class="text-emerald-700 hover:underline font-semibold">সকল নোটিফিকেশন পড়া হয়েছে</button>
+                <button onclick="closeModal('notificationModal')" class="px-3 py-1.5 bg-slate-200 text-slate-700 rounded-lg font-semibold">বন্ধ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leave Application Modal -->
+    <div id="leaveApplyModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 id="lfModalTitle" class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-umbrella-beach text-emerald-600"></i> ছুটির আবেদন ফরম
+                </h3>
+                <button type="button" onclick="closeModal('leaveApplyModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.saveLeaveApplicationForm(event)" class="space-y-3">
+                <input type="hidden" id="lfEditId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ছুটির কারণ</label>
+                    <textarea id="lfReason" required rows="3" placeholder="যেমন: পারিবারিক জরুরি কাজ..." class="w-full px-3 py-2 border rounded-lg text-sm bg-white"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">শুরুর তারিখ</label>
+                        <input type="date" id="lfFromDate" required class="w-full px-3 py-2 border rounded-lg text-xs bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">শেষের তারিখ</label>
+                        <input type="date" id="lfToDate" required class="w-full px-3 py-2 border rounded-lg text-xs bg-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">দিন সংখ্যা</label>
+                    <input type="number" id="lfDays" min="1" max="60" required placeholder="দিন সংখ্যা" class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold text-emerald-800">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('leaveApplyModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold">বাতিল</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow">আবেদন জমা দিন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Leave Approval Modal -->
+    <div id="adminLeaveApprovalModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-user-check text-indigo-600"></i> ছুটির আবেদন পর্যালোচনা ও সমন্বয় (Admin)
+                </h3>
+                <button type="button" onclick="closeModal('adminLeaveApprovalModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.confirmAdminLeaveApproval(event)" class="space-y-3">
+                <input type="hidden" id="apprLeaveIndex">
+                <div class="bg-slate-50 p-3 rounded-lg border text-xs space-y-1.5">
+                    <p><b>আবেদনকারী:</b> <span id="apprLeaveApplicant" class="text-slate-800 font-bold"></span></p>
+                    <p><b>ছুটির কারণ:</b> <span id="apprLeaveReason" class="text-slate-700"></span></p>
+                    <p><b>আবেদনকৃত ছুটির মেয়াদ:</b> <span id="apprLeaveRequestedDays" class="text-indigo-800 font-bold"></span></p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">অনুমোদিত ছুটির দিন</label>
+                    <input type="number" id="apprLeaveDaysInput" min="1" max="60" required class="w-full px-3 py-2 border-2 border-emerald-400 rounded-lg text-sm bg-white font-bold text-emerald-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">এডমিন নোট / মন্তব্য</label>
+                    <input type="text" id="apprLeaveNoteInput" placeholder="মন্তব্য লিখুন" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('adminLeaveApprovalModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বন্ধ করুন</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow">
+                        <i class="fa-solid fa-check mr-1"></i> অনুমোদন সম্পন্ন করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Factory Production Entry Modal -->
+    <div id="productionEntryModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-flask-vial text-emerald-600"></i> নতুন প্রোডাকশন ব্যাচ এন্ট্রি
+                </h3>
+                <button type="button" onclick="closeModal('productionEntryModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.saveProductionEntry(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">প্রোডাক্ট নির্বাচন করুন</label>
+                    <select id="peProductSelect" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-medium"></select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ব্যাচ নম্বর</label>
+                        <input type="text" id="peBatchNo" required placeholder="BATCH-1001" class="w-full px-3 py-2 border rounded-lg text-xs bg-white font-mono font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">প্রোডাকশন তারিখ</label>
+                        <input type="date" id="peDate" required class="w-full px-3 py-2 border rounded-lg text-xs bg-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">তৈরিকৃত পরিমাণ (Quantity)</label>
+                    <input type="number" id="peQty" min="1" required placeholder="সংখ্যা লিখুন" class="w-full px-3 py-2 border-2 border-emerald-400 rounded-lg text-sm font-bold text-emerald-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">মন্তব্য (অপশনাল)</label>
+                    <input type="text" id="peNotes" placeholder="মন্তব্য" class="w-full px-3 py-2 border rounded-lg text-xs bg-white">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('productionEntryModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold">বাতিল</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow">এন্ট্রি সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Production Approval Modal -->
+    <div id="adminProductionApprovalModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-check-to-slot text-indigo-600"></i> প্রোডাকশন অনুমোদন ও স্টক ইনপুট (Admin)
+                </h3>
+                <button type="button" onclick="closeModal('adminProductionApprovalModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.confirmAdminProductionApproval(event)" class="space-y-3">
+                <input type="hidden" id="apprProdIndex">
+                <div class="bg-slate-50 p-3 rounded-lg border text-xs space-y-1.5">
+                    <p><b>ব্যাচ নং:</b> <span id="apprProdBatchNo" class="text-indigo-800 font-bold font-mono"></span></p>
+                    <p><b>প্রোডাক্ট:</b> <span id="apprProdName" class="text-slate-800 font-bold"></span></p>
+                    <p><b>ফ্যাক্টরি এন্ট্রি পরিমাণ:</b> <span id="apprProdOriginalQty" class="text-slate-700 font-bold"></span></p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">অনুমোদিত পরিমাণ</label>
+                    <input type="number" id="apprProdQtyInput" min="1" required class="w-full px-3 py-2 border-2 border-emerald-400 rounded-lg text-sm font-bold text-emerald-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">এডমিন নোট</label>
+                    <input type="text" id="apprProdAdminNote" placeholder="রিমার্ক লিখুন" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                </div>
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeModal('adminProductionApprovalModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm">বন্ধ করুন</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow">
+                        <i class="fa-solid fa-check mr-1"></i> অনুমোদন ও স্টক আপডেট
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Dealer Modal -->
+    <div id="editDealerModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-store text-emerald-600"></i> ডিলার তথ্য ও ছবি এডিট
+                </h3>
+                <button type="button" onclick="closeModal('editDealerModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.saveEditDealer(event)" class="space-y-4">
+                <input type="hidden" id="editDlrCode">
+                <div class="bg-slate-50 p-4 rounded-xl border space-y-3">
+                    <label class="block text-xs font-bold text-slate-700 uppercase">
+                        <i class="fa-solid fa-camera text-emerald-600 mr-1"></i> ডিলারের ছবি (Photo Upload)
+                    </label>
+                    <div class="flex items-center gap-4">
+                        <div class="relative group shrink-0">
+                            <img id="editDlrImagePreview" src="https://images.unsplash.com/photo-1578496781985-452d4a934d50?w=120&auto=format&fit=crop&q=60" 
+                                 class="w-20 h-20 rounded-xl object-cover border-2 border-emerald-400 shadow-md">
+                        </div>
+                        <div class="flex-grow space-y-2">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">ডিভাইস থেকে নতুন ছবি নির্বাচন করুন</label>
+                                <input type="file" id="editDlrImageFile" accept="image/*" onchange="window.previewDealerEditImage(event)"
+                                       class="block w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer">
+                            </div>
+                            <div>
+                                <input type="text" id="editDlrImageUrl" placeholder="অথবা ছবির অনলাইন লিঙ্ক (URL)" class="w-full px-2.5 py-1 border rounded text-xs bg-white">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ডিলার কোড</label>
+                        <div id="editDlrCodeDisplay" class="px-3 py-2 bg-slate-100 border rounded-lg text-sm font-bold text-emerald-800"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">স্ট্যাটাস</label>
+                        <select id="editDlrStatus" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold">
+                            <option value="Active">সক্রিয় (Active)</option>
+                            <option value="Inactive">নিষ্ক্রিয় (Inactive)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ডিলারের নাম / ফার্মের নাম *</label>
+                    <input type="text" id="editDlrName" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">চেয়ারম্যান / এমডি / প্রোপাইটর নাম</label>
+                    <input type="text" id="editDlrChairman" placeholder="মালিকের নাম" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">জোন (জেলা) *</label>
+                        <select id="editDlrZone" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-semibold text-blue-800"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">মোবাইল নম্বর *</label>
+                        <input type="text" id="editDlrMobile" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-medium">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">পূর্ণ ঠিকানা</label>
+                    <input type="text" id="editDlrAddress" placeholder="ঠিকানা" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('editDealerModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold">বাতিল</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow flex items-center gap-1.5">
+                        <i class="fa-solid fa-save"></i> সংরক্ষণ করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Line-by-Line Delivery & Pending Status Breakdown Modal -->
+    <div id="orderLineStatusModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-800">অর্ডারের লাইনভিত্তিক ডেলিভারি ও পেন্ডিং স্ট্যাটাস</h3>
+                        <p class="text-xs text-slate-500">কোন কোন লাইন ডেলিভারি হয়েছে এবং কোন কোন লাইন পেন্ডিং রয়েছে তার নির্দিষ্ট বিবরণ</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModal('orderLineStatusModal')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">×</button>
+            </div>
+
+            <div id="olsPrintableArea" class="space-y-4">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border text-xs">
+                    <div>
+                        <span class="text-slate-500 block">অর্ডার আইডি</span>
+                        <span id="olsOrderId" class="font-bold text-emerald-800 text-sm font-mono"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">তারিখ</span>
+                        <span id="olsDate" class="font-semibold text-slate-700"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">ডিলার ও জোন</span>
+                        <span id="olsDealer" class="font-semibold text-blue-800"></span>
+                    </div>
+                    <div>
+                        <span class="text-slate-500 block">সেলস ম্যান</span>
+                        <span id="olsEmp" class="font-semibold text-slate-700"></span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-4 flex flex-wrap justify-between items-center pt-2 border-t mt-1 gap-2">
+                        <div class="flex items-center gap-4">
+                            <span>মোট বিল: <b id="olsTotal" class="text-slate-800"></b></span>
+                            <span>নগদ আদায়: <b id="olsCollection" class="text-emerald-700"></b></span>
+                            <span>বাকি (Due): <b id="olsDue" class="text-amber-600"></b></span>
+                        </div>
+                        <div id="olsOverallStatusBadge"></div>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto border rounded-xl bg-white">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b">
+                                <th class="p-2.5 text-center w-10">#</th>
+                                <th class="p-2.5">পণ্য / আইটেম বিবরণ</th>
+                                <th class="p-2.5 text-center">অর্ডার সংখ্যা</th>
+                                <th class="p-2.5 text-center bg-emerald-50/70 text-emerald-800">ডেলিভারিকৃত</th>
+                                <th class="p-2.5 text-center bg-amber-50/70 text-amber-800">অবশিষ্ট পেন্ডিং</th>
+                                <th class="p-2.5 text-right">মূল্য (৳)</th>
+                                <th class="p-2.5 text-center">লাইন স্ট্যাটাস</th>
+                            </tr>
+                        </thead>
+                        <tbody id="olsLinesTableBody" class="divide-y"></tbody>
+                        <tfoot id="olsLinesTableFoot" class="bg-slate-50 font-bold border-t"></tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap justify-between items-center gap-3 pt-3 border-t">
+                <div id="olsChallanBtnContainer"></div>
+                <div class="flex space-x-2">
+                    <button type="button" onclick="printContent('olsPrintableArea', 'অর্ডার লাইন ডেলিভারি স্ট্যাটাস')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-print"></i> লাইন স্ট্যাটাস প্রিন্ট
+                    </button>
+                    <button type="button" onclick="closeModal('orderLineStatusModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">বন্ধ করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Edit Order Modal -->
+    <div id="editOrderModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-indigo-600"></i> অর্ডার সম্পাদন ও সমন্বয় (Admin)
+                </h3>
+                <button type="button" onclick="closeModal('editOrderModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.saveEditOrder(event)" class="space-y-3">
+                <input type="hidden" id="editOrdId">
+                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-xs space-y-1">
+                    <p><b>অর্ডার ও ডিলার:</b> <span id="editOrdIdDisplay" class="font-bold text-indigo-900"></span></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">নগদ কালেকশন টাকা (৳)</label>
+                    <input type="number" id="editOrdCollection" min="0" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold text-emerald-800">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ডেলিভারি স্ট্যাটাস নির্ধারণ</label>
+                    <select id="editOrdStatus" required class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold text-slate-800">
+                        <option value="Pending">Pending (পেন্ডিং)</option>
+                        <option value="Delivered">Delivered (সম্পূর্ণ ডেলিভার্ড)</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('editOrderModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold">বাতিল</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow">
+                        <i class="fa-solid fa-check mr-1"></i> আপডেট করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Company Branding Modal (Requirement 5) -->
+    <div id="companyBrandingModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-nib text-emerald-600"></i> কোম্পানির লোগো, নাম ও ব্যানার পরিবর্তন
+                </h3>
+                <button type="button" onclick="closeModal('companyBrandingModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.saveCompanyBranding(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">কোম্পানির নাম (Company Name) *</label>
+                    <input type="text" id="brandNameInput" required placeholder="BCarebd.Com" class="w-full px-3 py-2 border rounded-lg text-sm bg-white font-bold text-emerald-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">স্লোগান / সাবটাইটেল (Subtitle) *</label>
+                    <input type="text" id="brandSubtitleInput" required placeholder="ভেটেরিনারি অ্যানিম্যাল মেডিসিন প্রস্তুতকারক প্রতিষ্ঠান" class="w-full px-3 py-2 border rounded-lg text-xs bg-white text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">নোটিস ব্যানার লেখা (Notice Banner Text) *</label>
+                    <textarea id="brandBannerInput" rows="3" required class="w-full px-3 py-2 border rounded-lg text-xs bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:outline-none leading-relaxed"></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 pt-2 border-t">
+                    <button type="button" onclick="closeModal('companyBrandingModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">বাতিল</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-floppy-disk"></i> সংরক্ষণ করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Cancel & Dealer Credit Request Modal (Requirement 8) -->
+    <div id="orderCancelModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-ban text-red-600"></i> পেন্ডিং আইটেম বাতিল ও ক্রেডিট আবেদন
+                </h3>
+                <button type="button" onclick="closeModal('orderCancelModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.submitOrderCancelRequest(event)" class="space-y-3">
+                <input type="hidden" id="cancelFormOrderId">
+                <input type="hidden" id="cancelFormItemCode">
+                <input type="hidden" id="cancelFormDealerCode">
+
+                <div class="bg-slate-50 p-3 rounded-xl border text-xs space-y-1.5">
+                    <p><b>অর্ডার আইডি:</b> <span id="cancelOrderId" class="font-bold text-slate-800 font-mono"></span></p>
+                    <p><b>ডিলার:</b> <span id="cancelDealerName" class="text-slate-700 font-semibold"></span></p>
+                    <p><b>পণ্য:</b> <span id="cancelItemName" class="text-emerald-800 font-bold"></span></p>
+                    <p><b>সর্বোচ্চ বাতিলযোগ্য পরিমাণ:</b> <span id="cancelMaxQty" class="text-amber-800 font-bold"></span></p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">কত পরিমাণ বাতিল করতে চান?</label>
+                    <input type="number" id="cancelQtyInput" min="1" required class="w-full px-3 py-2 border rounded-lg text-sm font-bold text-red-600 bg-white">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">বাতিলের কারণ</label>
+                    <input type="text" id="cancelReasonInput" required placeholder="কারণ লিখুন" class="w-full px-3 py-2 border rounded-lg text-xs bg-white">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2 border-t">
+                    <button type="button" onclick="closeModal('orderCancelModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">বন্ধ</button>
+                    <button type="submit" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold shadow flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-paper-plane"></i> আবেদন দাখিল করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Return Approval Modal (Requirement 8) -->
+    <div id="adminReturnApprovalModal" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-indigo-600"></i> সেলস রিটার্ন যাচাই ও অনুমোদন (Admin)
+                </h3>
+                <button type="button" onclick="closeModal('adminReturnApprovalModal')" class="text-slate-400 hover:text-slate-600 font-bold text-lg">×</button>
+            </div>
+            <form onsubmit="window.confirmAdminReturnApproval(event)" class="space-y-3.5">
+                <input type="hidden" id="apprReturnIndex">
+                <div class="bg-slate-50 p-3 rounded-xl border text-xs space-y-1.5">
+                    <p><b>রিটার্ন আইডি:</b> <span id="apprReturnId" class="font-bold text-slate-800 font-mono"></span></p>
+                    <p><b>ডিলার ও জোন:</b> <span id="apprReturnDealer" class="text-slate-700 font-semibold"></span></p>
+                    <p><b>কারণ:</b> <span id="apprReturnReason" class="text-amber-800 font-bold"></span></p>
+                </div>
+
+                <div id="apprReturnPhotoContainer" class="hidden text-center p-2 bg-slate-100 rounded-lg border"></div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-bold text-slate-700 uppercase">ফেরত পণ্যের সংখ্যা ও স্টক নির্ধারণ:</label>
+                    <div class="border rounded-xl overflow-hidden">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-bold uppercase">
+                                    <th class="p-2 border-r">পণ্য বিবরণ</th>
+                                    <th class="p-2 text-center border-r">অনুমোদিত পরিমাণ</th>
+                                    <th class="p-2 text-center">স্টক গন্তব্য</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apprReturnItemsTableBody" class="divide-y bg-white"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">এডমিন নোট / মন্তব্য</label>
+                    <input type="text" id="apprReturnAdminNote" placeholder="যেমন: মালামাল ল্যাবে পরীক্ষা করে ভালো স্টকে যুক্ত হলো" class="w-full px-3 py-2 border rounded-lg text-xs bg-white">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2 border-t">
+                    <button type="button" onclick="closeModal('adminReturnApprovalModal')" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">বন্ধ</button>
+                    <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-check"></i> অনুমোদন ও স্টক সমন্বয়
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Container for print -->
+    <div id="universalPrintContainer"></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+</body>
+</html>

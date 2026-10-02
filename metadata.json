@@ -1,0 +1,8 @@
+{
+  "name": "BCarebd.Com Management Portal",
+  "description": "BCarebd.Com Veterinary Enterprise Management Portal with Dealer, Inventory, Order, and Zone-based Management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
